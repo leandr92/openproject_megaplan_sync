@@ -1,0 +1,27 @@
+megaplan:
+  base_url: "https://company.megaplan.ru/api/v3"
+  username: "megaplan_user@example.com"
+  password: "your_megaplan_password"
+
+openproject:
+  base_url: "https://openproject.example.com"
+  username: "openproject_user"
+  password: "your_openproject_password_or_token"
+  default_user_id: null  # опционально: ID пользователя, к которому привязывать задачи без исполнителя
+
+projects:
+  - megaplan_id: "project-guid-1"
+    openproject_id: 42
+    include_closed: false
+  - megaplan_id: "project-guid-2"
+    openproject_id: 101
+
+sync:
+  page_size: 100
+  attachment_max_mb: 200
+  sync_attachments: true
+  sync_comments: true
+  dry_run: false
+  tmp_dir: .sync_tmp
+
+state_db: .sync_state.sqlite

@@ -1,0 +1,23 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[requires]
+python_version = "3.10"
+
+[packages]
+requests = ">=2.31"
+pydantic = ">=2.5"
+pyyaml = ">=6.0"
+"typer" = {version = ">=0.9", extras = ["all"]}
+python-dateutil = ">=2.8"
+tqdm = ">=4.66"
+
+[dev-packages]
+pytest = ">=7.4"
+pytest-cov = ">=4.1"
+responses = ">=0.24"
+
+[scripts]
+cli = "python -m openproject_megaplan_sync.cli"
