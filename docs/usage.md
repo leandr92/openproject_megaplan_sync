@@ -10,13 +10,14 @@
 4. Проверьте доступы командой `pipenv run cli verify -c config.yaml -vv`.
 
 ## Первичная миграция
-Запустите команду:
+Запустите команду (для безопасного прогона добавьте `--dry-run`):
 ```bash
-pipenv run cli initial-sync --config config.yaml -v
+pipenv run cli initial-sync --config config.yaml --dry-run -v
 ```
-- Скрипт перенесёт все задачи, комментарии и вложения.
+- Скрипт перенесёт (или смоделирует, если `--dry-run`) все задачи, комментарии и вложения.
 - Ход миграции выводится в консоль и в лог (по умолчанию stdout).
 - По завершении будет выведена сводная статистика в JSON.
+- Уберите `--dry-run`, чтобы выполнить фактическую миграцию (или выставьте `sync.dry_run: false` в конфигурации).
 
 ### Повторный запуск
 Благодаря `state_db` повторный запуск миграции идемпотентен: уже созданные задачи будут обновлены, новые — добавлены.
@@ -24,10 +25,11 @@ pipenv run cli initial-sync --config config.yaml -v
 ## Инкрементальная синхронизация
 Для переноса новых задач выполняйте:
 ```bash
-pipenv run cli sync-updates --config config.yaml
+pipenv run cli sync-updates --config config.yaml --dry-run
 ```
 - Без параметра `--since` модуль использует сохранённый в `sync_state` таймштамп последней успешной синхронизации каждого проекта.
 - Можно задать дату вручную: `--since 2024-02-01T00:00:00`.
+- Уберите `--dry-run`, чтобы применить изменения, либо настройте `sync.dry_run` в конфигурации.
 
 ### Планирование
 - Linux/macOS: добавьте cron-задачу, например `*/15 * * * * cd /path/to/repo && pipenv run cli sync-updates -c config.yaml >> /var/log/megaplan_sync.log 2>&1`.
@@ -50,3 +52,8 @@ pipenv run cli sync-updates --config config.yaml
 - Для сопоставления статусов создайте словарь и передайте в `TaskMapper` при инициализации сервиса.
 - Чтобы добавить кастомную бизнес-логику (например, фильтрацию задач), модифицируйте метод `_sync_project` или добавьте промежуточные фильтры.
 
+
+## Получение идентификаторов проектов
+- Megaplan: выполните `pipenv run python scripts/list_projects.py --source megaplan` и используйте значения из колонки ID.
+- OpenProject: выполните `pipenv run python scripts/list_projects.py --source openproject`.
+- Команда без параметра `--source` выводит списки из обеих систем сразу.

@@ -61,6 +61,41 @@ class MegaplanClient:
             )
         return response
 
+
+    def list_projects(self, *, limit: int = 200, offset: Optional[str] = None) -> MegaplanTaskPage:
+        """Возвращает страницу проектов Megaplan."""
+        params: Dict[str, str] = {"limit": str(limit)}
+        if offset:
+            params["offset"] = offset
+        endpoints = ["/projects/list", "/project/list", "/projects", "/Project/list"]
+        last_error: Optional[Exception] = None
+        for endpoint in endpoints:
+            try:
+                response = self._request("GET", endpoint, params=params)
+            except MegaplanAPIError as exc:
+                last_error = exc
+                if "404" in str(exc):
+                    continue
+                raise
+            else:
+                payload = response.json()
+                data = payload.get("data") or {}
+                items = data.get("items") or payload.get("projects") or payload.get("Items") or []
+                next_offset = data.get("next") if data else None
+                return MegaplanTaskPage(items=items, next_offset=next_offset)
+        raise last_error or MegaplanAPIError("Не удалось получить список проектов Megaplan")
+
+    def iter_projects(self, *, limit: int = 200) -> Iterable[Dict]:
+        """Итерирует все проекты Megaplan."""
+        offset: Optional[str] = None
+        while True:
+            page = self.list_projects(limit=limit, offset=offset)
+            for item in page.items:
+                yield item
+            if not page.next_offset:
+                break
+            offset = page.next_offset
+
     def list_tasks(
         self,
         project_id: str,

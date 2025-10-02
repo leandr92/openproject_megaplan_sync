@@ -21,13 +21,17 @@ Python-инструмент для миграции задач из Megaplan в 
    ```bash
    pipenv run cli verify --config config.yaml -v
    ```
-5. Запустите первичную миграцию:
+5. Запустите первичную миграцию (для тестового прогона добавьте `--dry-run`):
    ```bash
-   pipenv run cli initial-sync --config config.yaml -v
+   pipenv run cli initial-sync --config config.yaml --dry-run -v
    ```
-6. Для периодической синхронизации вызывайте:
+6. Для периодической синхронизации вызывайте (аналогично можно добавить `--dry-run`):
    ```bash
    pipenv run cli sync-updates --config config.yaml --since 2024-01-01T00:00:00
+   ```
+7. Чтобы узнать идентификаторы проектов, используйте вспомогательный скрипт:
+   ```bash
+   pipenv run python scripts/list_projects.py --config config.yaml --source both
    ```
 
 ## Конфигурация

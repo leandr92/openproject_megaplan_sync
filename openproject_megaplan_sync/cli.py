@@ -29,8 +29,12 @@ def configure_logging(verbosity: int) -> None:
     logging.basicConfig(level=level, format=LOG_FORMAT)
 
 
-def build_service(config_path: Path) -> tuple[TaskSyncService, MappingStore]:
+def build_service(
+    config_path: Path, *, dry_run_override: Optional[bool] = None
+) -> tuple[TaskSyncService, MappingStore]:
     config = AppConfig.load(config_path)
+    if dry_run_override is not None:
+        config.sync.dry_run = dry_run_override
     config.ensure_runtime_dirs()
     mapping_store = MappingStore(config.state_db)
     megaplan = MegaplanClient(config.megaplan)
@@ -43,10 +47,15 @@ def build_service(config_path: Path) -> tuple[TaskSyncService, MappingStore]:
 def initial_sync(
     config_path: Path = typer.Option(Path("config.yaml"), "--config", "-c", help="Путь к YAML конфигурации"),
     verbosity: int = typer.Option(0, "--verbose", "-v", count=True, help="Уровень логирования"),
+    dry_run: Optional[bool] = typer.Option(
+        None,
+        "--dry-run/--no-dry-run",
+        help="Переносить данные в режиме dry-run (по умолчанию берётся из конфигурации)",
+    ),
 ) -> None:
     """Полная миграция всех задач проектов, указанных в конфиге."""
     configure_logging(verbosity)
-    service, store = build_service(config_path)
+    service, store = build_service(config_path, dry_run_override=dry_run)
     try:
         stats = service.initial_migration()
         typer.echo(json.dumps({k: vars(v) for k, v in stats.items()}, indent=2, ensure_ascii=False))
@@ -59,10 +68,15 @@ def sync_updates(
     since: Optional[str] = typer.Option(None, help="ISO-время, с которого забирать изменения"),
     config_path: Path = typer.Option(Path("config.yaml"), "--config", "-c"),
     verbosity: int = typer.Option(0, "--verbose", "-v", count=True),
+    dry_run: Optional[bool] = typer.Option(
+        None,
+        "--dry-run/--no-dry-run",
+        help="Переносить данные в режиме dry-run (по умолчанию берётся из конфигурации)",
+    ),
 ) -> None:
     """Инкрементальная синхронизация задач."""
     configure_logging(verbosity)
-    service, store = build_service(config_path)
+    service, store = build_service(config_path, dry_run_override=dry_run)
     try:
         since_dt = parser.isoparse(since) if since else None
         stats = service.incremental_sync(since=since_dt)

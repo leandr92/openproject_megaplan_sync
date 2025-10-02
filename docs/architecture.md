@@ -64,9 +64,9 @@
 
 ## CLI и сценарии запуска
 Входная точка `python -m openproject_megaplan_sync.cli` (на базе `typer`) предоставляет команды:
-- `initial-sync --config config.yaml`
-- `sync-updates --since 2024-01-01T00:00:00 --config config.yaml`
-- `verify --dry-run` для проверки соединения и прав (создаёт/читает пробные задачи и пользователей)
+- `initial-sync --config config.yaml [--dry-run]`
+- `sync-updates --since 2024-01-01T00:00:00 --config config.yaml [--dry-run]`
+- `verify` для проверки соединения и прав (создаёт/читает пробные задачи и пользователей)
 
 ## Логирование и отчётность
 - Используется `logging` с ротацией файлов (`logs/sync.log`).

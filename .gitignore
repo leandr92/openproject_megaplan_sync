@@ -1,1 +1,9 @@
 config.yaml
+scripts/curl_megaplan_tasks.sh
+.gitignore
+scripts/curl_megaplan_discovery.sh
+.gitignore
+scripts/curl_megaplan_projects.sh
+.gitignore
+scripts/curl_megaplan_tasks_variants.sh
+.sync_state.sqlite

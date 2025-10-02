@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Iterable, Optional
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -40,6 +40,28 @@ class OpenProjectClient:
                 f"Ошибка OpenProject {response.status_code} при запросе {method} {url}: {response.text}"
             )
         return response
+
+    def list_projects(self, offset: Optional[int] = None, page_size: int = 50) -> Dict:
+        """Возвращает страницу проектов OpenProject."""
+        params: Dict[str, int] = {"pageSize": page_size}
+        if offset is not None:
+            params["offset"] = offset
+        response = self._request("GET", "/api/v3/projects", params=params)
+        return response.json()
+
+    def iter_projects(self, page_size: int = 50) -> Iterable[Dict]:
+        """Итерирует проекты OpenProject."""
+        offset = 1
+        while True:
+            payload = self.list_projects(offset=offset, page_size=page_size)
+            elements = payload.get("_embedded", {}).get("elements", [])
+            if not elements:
+                break
+            for element in elements:
+                yield element
+            offset += len(elements)
+            if len(elements) < page_size:
+                break
 
     def create_work_package(self, payload: Dict) -> Dict:
         response = self._request("POST", "/api/v3/work_packages", json=payload)
